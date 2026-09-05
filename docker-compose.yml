@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ams-api
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=AppointmentManagementDb;User ID=sa;Password=AmsStrong2024Pwd;TrustServerCertificate=True;Encrypt=False;
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ams-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ams-sqlserver
+    ports:
+      - "1434:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=AmsStrong2024Pwd
+      - MSSQL_SA_PASSWORD=AmsStrong2024Pwd
+      - MSSQL_PID=Express
+    volumes:
+      - ams_sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'AmsStrong2024Pwd' -Q 'SELECT 1' -C -b || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'AmsStrong2024Pwd' -Q 'SELECT 1'"]
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
+
+volumes:
+  ams_sqlserver_data:
