@@ -2,7 +2,7 @@ import { useState, FormEvent } from 'react';
 import { useSessions, useCreateSession, usePractitioners } from '../../hooks/useAppointments';
 import { DateRangePicker } from '../shared/DateRangePicker';
 import { LoadingSpinner, ErrorMessage, EmptyState } from '../shared/States';
-import { StatusBadge } from '../shared/StatusBadge';
+import { SessionStatusBadge } from '../shared/StatusBadge';
 import type { SessionStatus } from '../../types';
 
 const defaultStart = () => new Date();
@@ -145,7 +145,7 @@ export const SessionsPage = () => {
                         })}
                       </p>
                     </div>
-                    <StatusBadge status={s.status as SessionStatus} display={s.statusDisplay} />
+                    <SessionStatusBadge status={s.status} display={s.statusDisplay} />
                   </div>
 
                   <div className="d-flex gap-3 mb-3 small text-muted">

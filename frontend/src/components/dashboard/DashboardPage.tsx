@@ -34,6 +34,9 @@ export const DashboardPage = () => {
     { label: 'No Show', value: data?.noShowCount ?? 0, color: '#444441', icon: 'bi-person-x' },
   ];
 
+  // Fix: extract safely to avoid undefined errors
+  const dailyCounts = data?.dailyCounts ?? [];
+
   return (
     <div>
       <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
@@ -82,28 +85,28 @@ export const DashboardPage = () => {
         <div className="card-body px-2">
           {isLoading && <LoadingSpinner text="Loading chart data..." />}
           {error && <ErrorMessage message={error.message} />}
-          {!isLoading && !error && (!data?.dailyCounts?.length) && (
+          {!isLoading && !error && dailyCounts.length === 0 && (
             <EmptyState message="No appointment data for this date range." />
           )}
-          {!isLoading && !error && data?.dailyCounts?.length > 0 && (
+          {!isLoading && !error && dailyCounts.length > 0 && (
             <ResponsiveContainer width="100%" height={320}>
               <BarChart
-                data={data.dailyCounts}
+                data={dailyCounts}
                 margin={{ top: 10, right: 24, left: 0, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis
                   dataKey="date"
                   tick={{ fontSize: 11 }}
-                  tickFormatter={d => {
+                  tickFormatter={(d: string) => {
                     const dt = new Date(d);
                     return `${dt.getDate()}/${dt.getMonth() + 1}`;
                   }}
                 />
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                 <Tooltip
-                  formatter={(value, name) => [value, String(name)]}
-                  labelFormatter={d => {
+                  formatter={(value: number, name: string) => [value, name]}
+                  labelFormatter={(d: string) => {
                     const dt = new Date(d);
                     return dt.toLocaleDateString('en-GB', {
                       day: 'numeric', month: 'short', year: 'numeric',
